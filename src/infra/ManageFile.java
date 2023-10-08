@@ -82,19 +82,19 @@ public class ManageFile {
 		closeFile();
 	}
 	
-	public void SetupRoutes(String RouterPaths) throws IOException {
-		File Folder = new File(RouterPaths);
+	public void SetupRoutes(String RouterFilePath) throws IOException {
+		File Folder = new File(RouterFilePath);
 
         if (Folder.exists() && Folder.isDirectory()) {
             File[] Files = Folder.listFiles();
             for (File File : Files) {
                 if (File.isFile()) {
-                    Thread FileProcessorThread = new Thread(new FileProcessor(File));
-                    FileProcessorThread.start();
+                    Thread RouterProcessorThread = new Thread(new RouterProcessor(File));
+                    RouterProcessorThread.start();
                 }
             }
         } else {
-            System.out.println("A pasta não existe ou não é um diretório.");
+            throw new IOException("Pasta incorreta para processar as rotas!!");
         }
 	}
 	

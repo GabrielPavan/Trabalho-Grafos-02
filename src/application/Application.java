@@ -13,7 +13,7 @@ public class Application {
 		ManageFile _ManageFile = new ManageFile();
 		try {
 			_ManageFile.SetupConfig(FilesPath.DefaultConfigFilePath);
-			_ManageFile.SetupRoutes(FilesPath.DefaultRoutesPath);
+			_ManageFile.SetupRoutes(FilesPath.DefaultRoutesFilesPath);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
