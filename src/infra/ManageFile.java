@@ -81,6 +81,23 @@ public class ManageFile {
 		}
 		closeFile();
 	}
+	
+	public void SetupRoutes(String RouterPaths) throws IOException {
+		File Folder = new File(RouterPaths);
+
+        if (Folder.exists() && Folder.isDirectory()) {
+            File[] Files = Folder.listFiles();
+            for (File File : Files) {
+                if (File.isFile()) {
+                    Thread FileProcessorThread = new Thread(new FileProcessor(File));
+                    FileProcessorThread.start();
+                }
+            }
+        } else {
+            System.out.println("A pasta não existe ou não é um diretório.");
+        }
+	}
+	
 	public void closeFile() throws IOException {
 		if (BufferedReader != null) BufferedReader.close();
 		if (BufferedWriter != null) BufferedWriter.close();
