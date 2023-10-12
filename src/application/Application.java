@@ -14,7 +14,7 @@ public class Application {
 		try {
 			_ManageFile.SetupConfig(FilesPath.DefaultConfigFilePath);
 			_ManageFile.SetupRoutes(FilesPath.DefaultRoutesFilesPath);
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
 	}
