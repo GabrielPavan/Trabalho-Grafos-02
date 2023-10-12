@@ -13,6 +13,7 @@ import java.io.OutputStreamWriter;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -20,9 +21,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import entities.route.Route;
 import factories.MyThreadFactory;
 import factories.RouterFactory;
 import others.ConfigParameter;
+import others.FilesPath;
 
 public class ManageFile {
 
@@ -65,7 +68,7 @@ public class ManageFile {
 		
 		for (int i = 0; i < DataList.size() ; i++) {
 			if (!DataList.get(i).contains(ConfigParameter.DefaultSpliter)){
-				throw new IOException("O arquivo de configuração esta incorrto!");
+				throw new IOException("O arquivo de configuração esta incorreto!");
 			}
 			String[] ParameterAndValue = DataList.get(i).split(ConfigParameter.DefaultSpliter);
 			switch (ParameterAndValue[ConfigParameter.GetParameter]) {
@@ -84,18 +87,33 @@ public class ManageFile {
 		ThreadFactory threadFactory =  new MyThreadFactory();
 		ExecutorService executor = Executors.newFixedThreadPool(4, threadFactory);
 		
+		List<Route> Routes = new ArrayList<Route>();
+		
         if (Folder.exists() && Folder.isDirectory()) {
             File[] Files = Folder.listFiles();
-            for (File File : Files) {
-                if (File.isFile()) {
-                	executor.submit(() -> {
-                		new RouterFactory(File);
-                	});
+            for (File file : Files) {
+                if (file.isFile()) {
+                	if(FilesPath.DefaultRouterFileName.matcher(file.getName()).matches()) {
+                		executor.submit(() -> {
+                			Route route = new RouterFactory(file).getRoute();
+                			if(route != null) {
+                				Routes.add(route);
+//                				try {
+//									Thread.sleep(10000);
+//								} catch (InterruptedException e) {
+//									e.printStackTrace();
+//								}
+                				MoveFile(file, FilesPath.DefaultPathForProcessedFiles, StandardCopyOption.REPLACE_EXISTING);
+                			};
+                    	});
+                	} else {
+                		MoveFile(file, FilesPath.DefaultPathForUnProcessedFiles, StandardCopyOption.REPLACE_EXISTING);
+                	}
                 }
             }
             executor.shutdown();
-            if(!executor.awaitTermination(10, TimeUnit.SECONDS)) {
-            	throw new InterruptedException("O Tempo limete para o processamento das rotas Foi atingido!");
+            if(!executor.awaitTermination(Files.length * 10, TimeUnit.SECONDS)) {
+            	throw new InterruptedException("O Tempo limite para o processamento das rotas foi atingido!");
             }
         }
 	}
@@ -108,9 +126,9 @@ public class ManageFile {
 			}
 		}
 	}
-	public void MoveFile(String OriginPath, String DestinyPath, CopyOption copyOption) {
-		Path Origin = Path.of(OriginPath);
- 	   	Path Destiny = Path.of(DestinyPath);
+	public void MoveFile(File file, String DestinyPath, CopyOption copyOption) {
+		Path Origin = Path.of(file.getPath());
+ 	   	Path Destiny = Path.of(DestinyPath + file.getName());
  	   	try {
 			Files.move(Origin, Destiny, copyOption);
 		} catch (IOException e) {
