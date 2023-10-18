@@ -85,7 +85,7 @@ public class ManageFile {
 	public void SetupRoutes(String RouterFilePath) throws IOException, InterruptedException {
 		File Folder = new File(RouterFilePath);
 		ThreadFactory threadFactory =  new MyThreadFactory();
-		ExecutorService executor = Executors.newFixedThreadPool(4, threadFactory);
+		ExecutorService executor = Executors.newFixedThreadPool(MyThreadFactory.MaxNumberOfThreads, threadFactory);
 		
 		List<Route> Routes = new ArrayList<Route>();
 		
@@ -98,11 +98,6 @@ public class ManageFile {
                 			Route route = new RouterFactory(file).getRoute();
                 			if(route != null) {
                 				Routes.add(route);
-//                				try {
-//									Thread.sleep(10000);
-//								} catch (InterruptedException e) {
-//									e.printStackTrace();
-//								}
                 				MoveFile(file, FilesPath.DefaultPathForProcessedFiles, StandardCopyOption.REPLACE_EXISTING);
                 			};
                     	});
@@ -112,7 +107,7 @@ public class ManageFile {
                 }
             }
             executor.shutdown();
-            if(!executor.awaitTermination(Files.length * 10, TimeUnit.SECONDS)) {
+            if(!executor.awaitTermination(20, TimeUnit.SECONDS)) {
             	throw new InterruptedException("O Tempo limite para o processamento das rotas foi atingido!");
             }
         }
