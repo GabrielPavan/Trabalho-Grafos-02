@@ -105,13 +105,12 @@ public class ManageFile {
 								MoveFile(file, FilesPath.DefaultPathForProcessedFiles,
 										StandardCopyOption.REPLACE_EXISTING);
 							}
-							System.out.println(Thread.currentThread().getName());
 						});
 					} else {
 						MoveFile(file, FilesPath.DefaultPathForUnProcessedFiles, StandardCopyOption.REPLACE_EXISTING);
 					}
 				}
-			}, 50, 2000, TimeUnit.MILLISECONDS);
+			}, 0, 5000, TimeUnit.MILLISECONDS);
 		}
 	}
 	public void CreateFolder(String FolderPath) throws IOException {
