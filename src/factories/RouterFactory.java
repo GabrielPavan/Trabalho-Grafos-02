@@ -10,13 +10,13 @@ import entities.route.RouteConnections;
 import entities.route.RouteHeader;
 import entities.route.RouteTrailer;
 import entities.route.RouteWeights;
-import infra.ManageFile;
+import infra.ManagerFile;
 import others.FilesPath;
 import others.RouteParameter;
 
 public class RouterFactory {
 	private List<String> Data = new ArrayList<String>();
-	private ManageFile _ManageFile = new ManageFile();
+	private ManagerFile _ManageFile = new ManagerFile();
 
 	Route _Route = new Route();
 

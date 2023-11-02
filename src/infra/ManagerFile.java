@@ -27,7 +27,7 @@ import factories.RouterFactory;
 import others.ConfigParameter;
 import others.FilesPath;
 
-public class ManageFile {
+public class ManagerFile {
 
 	private InputStream InputStream;
 	private InputStreamReader InputStreamReader;
@@ -112,6 +112,20 @@ public class ManageFile {
 				}
 			}, 0, 5000, TimeUnit.MILLISECONDS);
 		}
+	}
+	public boolean ValidadeExecutionFile(){
+		File executionFile = new File("./execution.txt");
+        return ! executionFile.exists();
+	}
+	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder) throws IOException {
+        File executionFile = new File("./execution.txt");
+        executionFile.createNewFile();
+        BufferFileWriter(executionFile.getAbsolutePath());
+        BufferedWriter.append("MainFolder=" + MainFolder + "\n");
+        BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
+        BufferedWriter.append("FailFolder=" + FailFolder);
+        BufferedWriter.flush();
+        closeFile(); 
 	}
 	public void CreateFolder(String FolderPath) throws IOException {
 		File Folder = new File(FolderPath);
