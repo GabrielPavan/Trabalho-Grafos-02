@@ -2,14 +2,20 @@ package gui;
 
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import others.FilesPath;
+
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JButton;
 import javax.swing.SwingConstants;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class ConfigForm extends JDialog {
 
@@ -22,7 +28,7 @@ public class ConfigForm extends JDialog {
 	private String MainFolder, SucessFolder, FailFolder;
 	private JCheckBox AutomaticRouteCheckBox;
 
-	public ConfigForm(String pMainFolder, String pSucessFolder, String pFailFolder) {
+	public ConfigForm(String pMainFolder, String pSucessFolder, String pFailFolder, String pAutomaticRoute) {
 		setModal(true);
 		setTitle("Configurações");
 		setResizable(false);
@@ -64,28 +70,66 @@ public class ConfigForm extends JDialog {
 		contentPane.add(FailLabel);
 		
 		AutomaticRouteCheckBox = new JCheckBox("Rota automática");
+		AutomaticRouteCheckBox.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				FolderDefaultPathField.setEnabled(!AutomaticRouteCheckBox.isSelected());
+				SucessPathField.setEnabled(!AutomaticRouteCheckBox.isSelected());
+				FailPathField.setEnabled(!AutomaticRouteCheckBox.isSelected());
+			}
+		});
 		AutomaticRouteCheckBox.setBounds(62, 100, 120, 23);
 		contentPane.add(AutomaticRouteCheckBox);
 		
 		JButton SaveButton = new JButton("Salvar");
 		SaveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				MainFolder = FolderDefaultPathField.getText();
-				SucessFolder = SucessPathField.getText();
-				FailFolder = FailPathField.getText();
+				if(AutomaticRouteCheckBox.isSelected()) {
+					MainFolder = FilesPath.DefaultRoutesFilesPath;
+					SucessFolder = FilesPath.DefaultPathForProcessedFiles;
+					FailFolder = FilesPath.DefaultPathForUnProcessedFiles;
+				} else {
+					MainFolder = FolderDefaultPathField.getText();
+					SucessFolder = SucessPathField.getText();
+					FailFolder = FailPathField.getText();
+					if(MainFolder.trim().isEmpty()) {
+						JOptionPane.showMessageDialog(null, "O caminho para Pasta não pode ser vazio!");
+						return;
+					}
+					if(SucessFolder.trim().isEmpty()) {
+						JOptionPane.showMessageDialog(null, "O caminho para arquivos como sucesso não pode ser vazio!");
+						return;
+					}
+					if(FailFolder.trim().isEmpty()) {
+						JOptionPane.showMessageDialog(null, "O caminho para arquivos sem sucesso não pode ser vazio!");
+						return;
+					}
+					MainFolder = FolderDefaultPathField.getText();
+					SucessFolder = SucessPathField.getText();
+					FailFolder = FailPathField.getText();
+				}
 				dispose();
 			}
 		});
 		SaveButton.setBounds(145, 130, 89, 23);
 		contentPane.add(SaveButton);
 		
-		FolderDefaultPathField.setText(pMainFolder);
-		SucessPathField.setText(pSucessFolder);
-		FailPathField.setText(pFailFolder);
+		boolean CheckBoxStatus = Boolean.parseBoolean(pAutomaticRoute);
 		
+		if (CheckBoxStatus) {
+			AutomaticRouteCheckBox.setSelected(CheckBoxStatus);
+			FolderDefaultPathField.setEnabled(!CheckBoxStatus);
+			SucessPathField.setEnabled(!CheckBoxStatus);
+			FailPathField.setEnabled(!CheckBoxStatus);
+		} else {
+			AutomaticRouteCheckBox.setSelected(false);
+			FolderDefaultPathField.setText(pMainFolder);
+			SucessPathField.setText(pSucessFolder);
+			FailPathField.setText(pFailFolder);
+		}
+	
 		setVisible(true);
 	}
-
+	
 	public String getMainFolder() {
 		return MainFolder;
 	}

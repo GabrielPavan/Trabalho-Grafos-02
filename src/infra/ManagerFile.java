@@ -60,9 +60,29 @@ public class ManagerFile {
 		}
 		return DataList;
 	}
-
-	public void SetupConfig(String ConfigPath) throws IOException {
-		BufferFileReader(ConfigPath);
+	
+	public boolean ExecutionFileExist(){
+		File executionFile = new File("./execution.txt");
+        return executionFile.exists();
+	}
+	
+	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder, Boolean AutomaticRoute) throws IOException {
+        File executionFile = new File("./execution.txt");
+        if(executionFile.exists()) {
+        	executionFile.delete();
+        }
+        executionFile.createNewFile();
+        BufferFileWriter(executionFile.getAbsolutePath());
+        BufferedWriter.append("MainFolder=" + MainFolder + "\n");
+        BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
+        BufferedWriter.append("FailFolder=" + FailFolder + "\n");
+        BufferedWriter.append("AutomaticRoute=" + AutomaticRoute.toString());
+        BufferedWriter.flush();
+        closeFile(); 
+	}
+	
+	public void ExecExecutionFile() throws IOException {
+		BufferFileReader(FilesPath.DefaultExecutionFilePath);
 		List<String> DataList = GetDataFromFile();
 		closeFile();
 
@@ -76,17 +96,35 @@ public class ManagerFile {
 			}
 			String[] ParameterAndValue = DataList.get(i).split(ConfigParameter.DefaultSpliter);
 			switch (ParameterAndValue[ConfigParameter.GetParameter]) {
-			case ConfigParameter.Processado:
-			case ConfigParameter.NãoProcessado:
+			case ConfigParameter.MainFolder:
 				CreateFolder(ParameterAndValue[ConfigParameter.GetValue]);
+				break;
+			case ConfigParameter.SucessFolder:
+				CreateFolder(ParameterAndValue[ConfigParameter.GetValue]);
+				break;
+			case ConfigParameter.FailFolder:
+				CreateFolder(ParameterAndValue[ConfigParameter.GetValue]);
+				break;
+			case ConfigParameter.AutomaticRoute:
 				break;
 			default:
 				throw new IOException("Parametro não definido nas configurações!!");
 			}
 		}
 	}
+	
+	public List<String> ReadExecutionFile() throws IOException {
+		BufferFileReader(FilesPath.DefaultExecutionFilePath);
+		List<String> DataList = GetDataFromFile();
+		closeFile();
+		
+		if (DataList.size() < ConfigParameter.NumberOfConfiguredParameters) {
+			throw new IOException("O arquivo esta imcompleto ou esta vazio!");
+		}
+		return DataList;
+	}
 
-	public void MonitorRoutes(String RouterFilePath) throws IOException, InterruptedException {
+	public void MonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) throws IOException, InterruptedException {
 		File Folder = new File(RouterFilePath);
 		List<Route> Routes = new ArrayList<Route>();
 
@@ -102,31 +140,17 @@ public class ManagerFile {
 							Route route = new RouterFactory(file).getRoute();
 							if (route != null) {
 								Routes.add(route);
-								MoveFile(file, FilesPath.DefaultPathForProcessedFiles,
-										StandardCopyOption.REPLACE_EXISTING);
+								MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
 							}
 						});
 					} else {
-						MoveFile(file, FilesPath.DefaultPathForUnProcessedFiles, StandardCopyOption.REPLACE_EXISTING);
+						MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
 					}
 				}
 			}, 0, 5000, TimeUnit.MILLISECONDS);
 		}
 	}
-	public boolean ValidadeExecutionFile(){
-		File executionFile = new File("./execution.txt");
-        return ! executionFile.exists();
-	}
-	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder) throws IOException {
-        File executionFile = new File("./execution.txt");
-        executionFile.createNewFile();
-        BufferFileWriter(executionFile.getAbsolutePath());
-        BufferedWriter.append("MainFolder=" + MainFolder + "\n");
-        BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
-        BufferedWriter.append("FailFolder=" + FailFolder);
-        BufferedWriter.flush();
-        closeFile(); 
-	}
+	
 	public void CreateFolder(String FolderPath) throws IOException {
 		File Folder = new File(FolderPath);
 		if (!Folder.exists()) {
