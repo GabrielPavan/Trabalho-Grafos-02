@@ -26,13 +26,15 @@ public class ConfigForm extends JDialog {
 	private JTextField FailPathField;
 	
 	private String MainFolder, SucessFolder, FailFolder;
-	private JCheckBox AutomaticRouteCheckBox;
+	private JCheckBox AutomaticPathCheckBox, BackgroundExecutionCheckBox;
 
-	public ConfigForm(String pMainFolder, String pSucessFolder, String pFailFolder, String pAutomaticRoute) {
+	public ConfigForm(String pMainFolder, String pSucessFolder, String pFailFolder, Boolean pAutomaticRoute, Boolean pBackgroundExecution) {
+		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		setModal(true);
 		setTitle("Configurações");
 		setResizable(false);
-		setBounds(100, 100, 260, 205);
+		setLocationRelativeTo(null);
+		setBounds(100, 100, 260, 235);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -69,28 +71,41 @@ public class ConfigForm extends JDialog {
 		FailLabel.setBounds(10, 76, 55, 14);
 		contentPane.add(FailLabel);
 		
-		AutomaticRouteCheckBox = new JCheckBox("Rota automática");
-		AutomaticRouteCheckBox.addChangeListener(new ChangeListener() {
+		AutomaticPathCheckBox = new JCheckBox("Pastas automáticamente");;
+		AutomaticPathCheckBox.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				FolderDefaultPathField.setEnabled(!AutomaticRouteCheckBox.isSelected());
-				SucessPathField.setEnabled(!AutomaticRouteCheckBox.isSelected());
-				FailPathField.setEnabled(!AutomaticRouteCheckBox.isSelected());
+				if (AutomaticPathCheckBox.isSelected()) {
+					FolderDefaultPathField.setText(FilesPath.DefaultRoutesFilesPath);
+					SucessPathField.setText(FilesPath.DefaultPathForProcessedFiles); 
+					FailPathField.setText(FilesPath.DefaultPathForUnProcessedFiles);
+				} else {
+					FolderDefaultPathField.setText("");
+					SucessPathField.setText(""); 
+					FailPathField.setText("");
+				}
+				
+				FolderDefaultPathField.setEnabled(!AutomaticPathCheckBox.isSelected());
+				SucessPathField.setEnabled(!AutomaticPathCheckBox.isSelected());
+				FailPathField.setEnabled(!AutomaticPathCheckBox.isSelected());
 			}
 		});
-		AutomaticRouteCheckBox.setBounds(62, 100, 120, 23);
-		contentPane.add(AutomaticRouteCheckBox);
+		AutomaticPathCheckBox.setSelected(pAutomaticRoute);
+		AutomaticPathCheckBox.setBounds(50, 100, 184, 23);
+		contentPane.add(AutomaticPathCheckBox);
+		
+		BackgroundExecutionCheckBox = new JCheckBox("Rodar em background");
+		BackgroundExecutionCheckBox.setSelected(pBackgroundExecution);
+		BackgroundExecutionCheckBox.setBounds(50, 126, 184, 23);
+		contentPane.add(BackgroundExecutionCheckBox);
 		
 		JButton SaveButton = new JButton("Salvar");
 		SaveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(AutomaticRouteCheckBox.isSelected()) {
-					MainFolder = FilesPath.DefaultRoutesFilesPath;
-					SucessFolder = FilesPath.DefaultPathForProcessedFiles;
-					FailFolder = FilesPath.DefaultPathForUnProcessedFiles;
-				} else {
-					MainFolder = FolderDefaultPathField.getText();
-					SucessFolder = SucessPathField.getText();
-					FailFolder = FailPathField.getText();
+				MainFolder = FolderDefaultPathField.getText();
+				SucessFolder = SucessPathField.getText();
+				FailFolder = FailPathField.getText();
+				
+				if(!AutomaticPathCheckBox.isSelected()) {	
 					if(MainFolder.trim().isEmpty()) {
 						JOptionPane.showMessageDialog(null, "O caminho para Pasta não pode ser vazio!");
 						return;
@@ -103,31 +118,12 @@ public class ConfigForm extends JDialog {
 						JOptionPane.showMessageDialog(null, "O caminho para arquivos sem sucesso não pode ser vazio!");
 						return;
 					}
-					MainFolder = FolderDefaultPathField.getText();
-					SucessFolder = SucessPathField.getText();
-					FailFolder = FailPathField.getText();
 				}
 				dispose();
 			}
 		});
-		SaveButton.setBounds(145, 130, 89, 23);
+		SaveButton.setBounds(145, 162, 89, 23);
 		contentPane.add(SaveButton);
-		
-		boolean CheckBoxStatus = Boolean.parseBoolean(pAutomaticRoute);
-		
-		if (CheckBoxStatus) {
-			AutomaticRouteCheckBox.setSelected(CheckBoxStatus);
-			FolderDefaultPathField.setEnabled(!CheckBoxStatus);
-			SucessPathField.setEnabled(!CheckBoxStatus);
-			FailPathField.setEnabled(!CheckBoxStatus);
-		} else {
-			AutomaticRouteCheckBox.setSelected(false);
-			FolderDefaultPathField.setText(pMainFolder);
-			SucessPathField.setText(pSucessFolder);
-			FailPathField.setText(pFailFolder);
-		}
-	
-		setVisible(true);
 	}
 	
 	public String getMainFolder() {
@@ -140,6 +136,16 @@ public class ConfigForm extends JDialog {
 		return FailFolder;
 	}
 	public boolean getAutomaticRouteCheckBox() {
-		return AutomaticRouteCheckBox.isSelected();
+		return AutomaticPathCheckBox.isSelected();
+	}
+	public boolean getBackgroundExecutionCheckBox() {
+		return BackgroundExecutionCheckBox.isSelected();
+	}
+	public void setInformationFromConfigurationFile(String pMainFolder, String pSucessFolder, String pFailFolder, Boolean pAutomaticRoute, Boolean pBackgroundExecution) {
+		FolderDefaultPathField.setText(pMainFolder);
+		SucessPathField.setText(pSucessFolder); 
+		FailPathField.setText(pFailFolder);
+		AutomaticPathCheckBox.setSelected(pAutomaticRoute);
+		BackgroundExecutionCheckBox.setSelected(pBackgroundExecution);
 	}
 }

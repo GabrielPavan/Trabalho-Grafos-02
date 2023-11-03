@@ -66,7 +66,7 @@ public class ManagerFile {
         return executionFile.exists();
 	}
 	
-	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder, Boolean AutomaticRoute) throws IOException {
+	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder, Boolean AutomaticRoute, Boolean BackgroundExecution) throws IOException {
         File executionFile = new File("./execution.txt");
         if(executionFile.exists()) {
         	executionFile.delete();
@@ -76,7 +76,8 @@ public class ManagerFile {
         BufferedWriter.append("MainFolder=" + MainFolder + "\n");
         BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
         BufferedWriter.append("FailFolder=" + FailFolder + "\n");
-        BufferedWriter.append("AutomaticRoute=" + AutomaticRoute.toString());
+        BufferedWriter.append("AutomaticRoute=" + AutomaticRoute.toString() + "\n");
+        BufferedWriter.append("BackgroundExecution="+BackgroundExecution.toString());
         BufferedWriter.flush();
         closeFile(); 
 	}
@@ -106,6 +107,7 @@ public class ManagerFile {
 				CreateFolder(ParameterAndValue[ConfigParameter.GetValue]);
 				break;
 			case ConfigParameter.AutomaticRoute:
+			case ConfigParameter.BackgroundExecution:
 				break;
 			default:
 				throw new IOException("Parametro não definido nas configurações!!");
@@ -117,17 +119,16 @@ public class ManagerFile {
 		BufferFileReader(FilesPath.DefaultExecutionFilePath);
 		List<String> DataList = GetDataFromFile();
 		closeFile();
-		
-		if (DataList.size() < ConfigParameter.NumberOfConfiguredParameters) {
-			throw new IOException("O arquivo esta imcompleto ou esta vazio!");
-		}
+	
 		return DataList;
 	}
 
-	public void MonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) throws IOException, InterruptedException {
+	public void EnableMonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) throws IOException, InterruptedException {
 		File Folder = new File(RouterFilePath);
 		List<Route> Routes = new ArrayList<Route>();
-
+		
+		DisableMonitorRoutes();
+		
 		executor = Executors.newScheduledThreadPool(1);
 		fileExecutor = new ThreadPoolExecutor(0,2,1000,TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
 		
@@ -150,7 +151,16 @@ public class ManagerFile {
 			}, 0, 5000, TimeUnit.MILLISECONDS);
 		}
 	}
-	
+	public void DisableMonitorRoutes() {
+		if (executor != null) {
+		    executor.shutdown();
+		    executor = null;
+		}
+		if (fileExecutor != null) {
+		    fileExecutor.shutdown();
+		    fileExecutor = null;
+		}
+	}
 	public void CreateFolder(String FolderPath) throws IOException {
 		File Folder = new File(FolderPath);
 		if (!Folder.exists()) {
@@ -173,5 +183,7 @@ public class ManagerFile {
 			BufferedReader.close();
 		if (BufferedWriter != null)
 			BufferedWriter.close();
+		if (executor != null)
+			executor.close();
 	}
 }
