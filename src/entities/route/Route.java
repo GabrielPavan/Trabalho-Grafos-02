@@ -3,13 +3,15 @@ package entities.route;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Node;
+
 public class Route {
 	private RouteHeader Header;
 	private List<RouteConnections> Connections = new ArrayList<>();
 	private List<RouteWeights> Weights = new ArrayList<>();
 	private RouteTrailer Trailer;
 	
-	private int NumberOfNodes;
+	private int sumOfWeights;
 	
 	public RouteHeader getHeader() {
 		return Header;
@@ -36,19 +38,32 @@ public class Route {
 		Trailer = trailer;
 	}
 	
-	public int getTotalNodes() {
-		if(Connections.size() == 0) {
+	public Integer getTotalNodes() {
+		if(Connections.size() == 0)
 			return 0;
-		}
 		
-		NumberOfNodes = 1;
-		int ValueOfFirstNode = Connections.get(0).OriginNode;
+		List<Integer> Nodes = new ArrayList<Integer>();
+		
 		Connections.forEach(x -> {
-			if(ValueOfFirstNode != x.OriginNode) {
-				NumberOfNodes++;
+			if(!Nodes.contains(x.OriginNode)) {
+				Nodes.add(x.OriginNode);
+			}
+			if(!Nodes.contains(x.DestinyNode)) {
+				Nodes.add(x.DestinyNode);
 			}
 		});
 		
-		return NumberOfNodes;
+		return Nodes.size();
+	}
+	
+	public int getTotalSumOfWeights() {
+		if(Weights.size() == 0)
+			return 0;
+		
+		Weights.forEach(x -> {
+			sumOfWeights += x.getWeight();
+		});
+		
+		return sumOfWeights;
 	}
 }

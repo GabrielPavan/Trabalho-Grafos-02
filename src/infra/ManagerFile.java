@@ -36,7 +36,7 @@ public class ManagerFile {
 	private OutputStream OutputStream;
 	private OutputStreamWriter OutputStreamWriter;
 	private BufferedWriter BufferedWriter;
-	
+
 	private ScheduledExecutorService executor;
 	private ThreadPoolExecutor fileExecutor;
 
@@ -60,28 +60,29 @@ public class ManagerFile {
 		}
 		return DataList;
 	}
-	
-	public boolean ExecutionFileExist(){
+
+	public boolean ExecutionFileExist() {
 		File executionFile = new File("./execution.txt");
-        return executionFile.exists();
+		return executionFile.exists();
 	}
-	
-	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder, Boolean AutomaticRoute, Boolean BackgroundExecution) throws IOException {
-        File executionFile = new File("./execution.txt");
-        if(executionFile.exists()) {
-        	executionFile.delete();
-        }
-        executionFile.createNewFile();
-        BufferFileWriter(executionFile.getAbsolutePath());
-        BufferedWriter.append("MainFolder=" + MainFolder + "\n");
-        BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
-        BufferedWriter.append("FailFolder=" + FailFolder + "\n");
-        BufferedWriter.append("AutomaticRoute=" + AutomaticRoute.toString() + "\n");
-        BufferedWriter.append("BackgroundExecution="+BackgroundExecution.toString());
-        BufferedWriter.flush();
-        closeFile(); 
+
+	public void UpdateExecutionFile(String MainFolder, String SucessFolder, String FailFolder, Boolean AutomaticRoute,
+			Boolean BackgroundExecution) throws IOException {
+		File executionFile = new File("./execution.txt");
+		if (executionFile.exists()) {
+			executionFile.delete();
+		}
+		executionFile.createNewFile();
+		BufferFileWriter(executionFile.getAbsolutePath());
+		BufferedWriter.append("MainFolder=" + MainFolder + "\n");
+		BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
+		BufferedWriter.append("FailFolder=" + FailFolder + "\n");
+		BufferedWriter.append("AutomaticRoute=" + AutomaticRoute.toString() + "\n");
+		BufferedWriter.append("BackgroundExecution=" + BackgroundExecution.toString());
+		BufferedWriter.flush();
+		closeFile();
 	}
-	
+
 	public void ExecExecutionFile() throws IOException {
 		BufferFileReader(FilesPath.DefaultExecutionFilePath);
 		List<String> DataList = GetDataFromFile();
@@ -114,23 +115,24 @@ public class ManagerFile {
 			}
 		}
 	}
-	
+
 	public List<String> ReadExecutionFile() throws IOException {
 		BufferFileReader(FilesPath.DefaultExecutionFilePath);
 		List<String> DataList = GetDataFromFile();
 		closeFile();
-	
+
 		return DataList;
 	}
 
 	public void EnableMonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) throws IOException, InterruptedException {
-		File Folder = new File(RouterFilePath);
-		List<Route> Routes = new ArrayList<Route>();
 		
 		DisableMonitorRoutes();
-		
+
 		executor = Executors.newScheduledThreadPool(1);
-		fileExecutor = new ThreadPoolExecutor(0,2,1000,TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
+		fileExecutor = new ThreadPoolExecutor(0, 2, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
+		
+		File Folder = new File(RouterFilePath);
+		List<Route> Routes = new ArrayList<Route>();
 		
 		if (Folder.exists() && Folder.isDirectory()) {
 			executor.scheduleAtFixedRate(() -> {
@@ -142,6 +144,8 @@ public class ManagerFile {
 							if (route != null) {
 								Routes.add(route);
 								MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
+							} else {
+								MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
 							}
 						});
 					} else {
@@ -151,16 +155,18 @@ public class ManagerFile {
 			}, 0, 5000, TimeUnit.MILLISECONDS);
 		}
 	}
+
 	public void DisableMonitorRoutes() {
 		if (executor != null) {
-		    executor.shutdown();
-		    executor = null;
+			executor.shutdown();
+			executor = null;
 		}
 		if (fileExecutor != null) {
-		    fileExecutor.shutdown();
-		    fileExecutor = null;
+			fileExecutor.shutdown();
+			fileExecutor = null;
 		}
 	}
+
 	public void CreateFolder(String FolderPath) throws IOException {
 		File Folder = new File(FolderPath);
 		if (!Folder.exists()) {
@@ -169,6 +175,7 @@ public class ManagerFile {
 			}
 		}
 	}
+
 	public void MoveFile(File file, String DestinyPath, CopyOption copyOption) {
 		Path Origin = Path.of(file.getPath());
 		Path Destiny = Path.of(DestinyPath + file.getName());
@@ -178,6 +185,7 @@ public class ManagerFile {
 			e.printStackTrace();
 		}
 	}
+
 	public void closeFile() throws IOException {
 		if (BufferedReader != null)
 			BufferedReader.close();

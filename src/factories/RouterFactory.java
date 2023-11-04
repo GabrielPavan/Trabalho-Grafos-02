@@ -31,13 +31,10 @@ public class RouterFactory {
 			
 		} catch (Exception e) {
 			_Route = null;
-			_ManageFile.MoveFile(pRouterFile, FilesPath.DefaultPathForUnProcessedFiles,
-					StandardCopyOption.REPLACE_EXISTING);
 			System.out.println("Falha na criação da Rota: " + pRouterFile.getName());
 			System.out.println(e.getMessage());
 		}
 	}
-
 	private void ReadFileRoute(File pRouterFile) throws Exception {
 		_ManageFile.BufferFileReader(pRouterFile.getPath());
 		Data = _ManageFile.GetDataFromFile();
@@ -45,6 +42,7 @@ public class RouterFactory {
 	}
 
 	private void CreateRoute(List<String> pData) throws Exception {
+		
 		for (int i = 0; i < pData.size(); i++) {
 			String Row = pData.get(i);
 			if(RouteParameter.TrailerPattern.matcher(Row).matches()) {
@@ -54,6 +52,7 @@ public class RouterFactory {
 		if (_Route.getTrailer() == null) {
 			throw new Exception("Trailer inválido");
 		}
+		
 		for (int i = 0; i < pData.size(); i++) {
 			String Row = pData.get(i);
 			if(RouteParameter.ConnectionPattern.matcher(Row).matches()) {
@@ -69,6 +68,7 @@ public class RouterFactory {
 		if (_Route.getWeights().size() != _Route.getTrailer().getNumberOfWeightLines()) {
 			throw new Exception("Número de linhas diferentes");
 		}
+		
 		for (int i = 0; i < pData.size(); i++) {
 			String Row = pData.get(i);
 			if(RouteParameter.HeaderPattern.matcher(Row).matches()) {
@@ -84,17 +84,23 @@ public class RouterFactory {
 		// 00NNSP
 
 		Integer NumberOfNodes = Integer.parseInt(HeaderRow.substring(0, 4));
+		
 		if (NumberOfNodes == 0)
 			throw new Exception("Falha! -> Número total de nós inválido.");
-		if (NumberOfNodes != _Route.getTotalNodes()) {
+		
+		Integer teste = _Route.getTotalNodes();
+		
+		if (NumberOfNodes != teste) {
 			String NewHeader = "0";
 			NewHeader = NewHeader.concat(HeaderRow);
 			return CreateHeader(NewHeader);
 		}
+		
 		Integer SumOfEdgeWeights = Integer.parseInt(HeaderRow.substring(4));
-		if (SumOfEdgeWeights != _Route.getTrailer().getSum0fWeightsBetweenAllNodes()) {
-			throw new Exception(
-					"Falha! -> Soma dos pesos difere (Valor do Registro HEADER = NN e Soma dos Pesos = NN)");
+		
+		
+		if (SumOfEdgeWeights != _Route.getTotalSumOfWeights()) {
+			throw new Exception("Falha! -> Soma dos pesos difere (Valor do Registro HEADER = NN e Soma dos Pesos = NN)");
 		}
 
 		return new RouteHeader(NumberOfNodes, SumOfEdgeWeights);
@@ -102,7 +108,7 @@ public class RouterFactory {
 
 	private RouteConnections CreateConnection(String ConnectionRow) {
 		// 01NO=ND
-
+			
 		String[] Data = ConnectionRow.split(RouteParameter.DefaultValueSpliter);
 
 		Integer OriginNode = Integer.parseInt(Data[0].substring(2));
