@@ -9,17 +9,30 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
+import entities.route.Route;
 import infra.ManagerFile;
 import others.ConfigParameter;
 
 public class MyTrayIcon {
+	
 	private TrayIcon trayIcon;
 	private ManagerFile managerFile = new ManagerFile();
+	
+	private ScheduledExecutorService scheduledExecutor;
+	private ThreadPoolExecutor routerCreatorPool;
 	
 	public void createTrayIcon(String iconImagePath, String toolTip) throws Exception {
 		if(SystemTray.isSupported()) {
@@ -128,26 +141,69 @@ public class MyTrayIcon {
 				managerFile.closeFile();
 				
 				if (!configForm.getBackgroundExecutionCheckBox()) {
-					managerFile.DisableMonitorRoutes();
 					openAndConfigForm(new MainForm());
 				} else {
-					managerFile.EnableMonitorRoutes(configForm.getMainFolder(), configForm.getSucessFolder(), configForm.getFailFolder());
+					if(scheduledExecutor == null) {
+						EnableMonitorRoutes(MailFolder, SucessFolder, FailFolder);
+					}
 				}
 			} 
 			
 			if(Form instanceof MainForm) {
 				MainForm mainForm  = (MainForm) Form;
 				if(!BackgroundExecution) {
+					if(scheduledExecutor != null) {
+						DisableMonitorRoutes();
+					}
 					mainForm.setVisible(true);
+					
 				} else {
 					mainForm.dispose();
-					managerFile.EnableMonitorRoutes(MailFolder, SucessFolder, FailFolder);
+					if(scheduledExecutor == null) {
+						EnableMonitorRoutes(MailFolder, SucessFolder, FailFolder);
+					}
 					JOptionPane.showMessageDialog(null, "O sistema esta definido para excutar em segundo plano\ncaso queira alterar acesse as configurações");
 				}
 			}
 			
 		} catch (Exception e ) {
 			JOptionPane.showMessageDialog(null, "Erro ao ler o arquivo de execução!! \n\n" + e.getMessage() );
+		}
+	}
+	
+	private void EnableMonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) {
+		List<Route> Routes = new ArrayList<Route>();
+		
+		scheduledExecutor = Executors.newScheduledThreadPool(1);
+		routerCreatorPool = new ThreadPoolExecutor(0, 2, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
+		
+		scheduledExecutor.scheduleAtFixedRate(() -> {
+			File[] Files = null;
+			Files = managerFile.getFilesFromFolder(RouterFilePath);
+			if(Files != null) {
+				for (File file : Files) {
+					routerCreatorPool.execute(() -> {
+						Route route = managerFile.CreateRouteFromFile(file);
+						if(route != null) {
+							Routes.add(route);
+							managerFile.MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
+						} else {
+							managerFile.MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
+						} 
+					});
+				}
+			}
+		}
+		, 0, 5000, TimeUnit.MILLISECONDS);
+	}
+	public void DisableMonitorRoutes() {
+		if (scheduledExecutor != null) {
+			scheduledExecutor.shutdown();
+			scheduledExecutor = null;
+		}
+		if (routerCreatorPool != null) {
+			routerCreatorPool.shutdown();
+			routerCreatorPool = null;
 		}
 	}
 }

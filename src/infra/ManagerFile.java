@@ -13,15 +13,8 @@ import java.io.OutputStreamWriter;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import entities.route.Route;
 import factories.RouterFactory;
 import others.ConfigParameter;
@@ -36,9 +29,6 @@ public class ManagerFile {
 	private OutputStream OutputStream;
 	private OutputStreamWriter OutputStreamWriter;
 	private BufferedWriter BufferedWriter;
-
-	private ScheduledExecutorService executor;
-	private ThreadPoolExecutor fileExecutor;
 
 	public void BufferFileReader(String FilePath) throws IOException {
 		InputStream = new FileInputStream(FilePath);
@@ -83,6 +73,14 @@ public class ManagerFile {
 		closeFile();
 	}
 
+	public List<String> ReadExecutionFile() throws IOException {
+		BufferFileReader(FilesPath.DefaultExecutionFilePath);
+		List<String> DataList = GetDataFromFile();
+		closeFile();
+
+		return DataList;
+	}
+
 	public void ExecExecutionFile() throws IOException {
 		BufferFileReader(FilesPath.DefaultExecutionFilePath);
 		List<String> DataList = GetDataFromFile();
@@ -116,55 +114,21 @@ public class ManagerFile {
 		}
 	}
 
-	public List<String> ReadExecutionFile() throws IOException {
-		BufferFileReader(FilesPath.DefaultExecutionFilePath);
-		List<String> DataList = GetDataFromFile();
-		closeFile();
-
-		return DataList;
+	public Route CreateRouteFromFile(File file) {
+		if (FilesPath.DefaultRouterFileName.matcher(file.getName()).matches()) {
+			return new RouterFactory(file).getRoute();
+		} else {
+			return null;
+		}
 	}
 
-	public void EnableMonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) throws IOException, InterruptedException {
-		
-		DisableMonitorRoutes();
-
-		executor = Executors.newScheduledThreadPool(1);
-		fileExecutor = new ThreadPoolExecutor(0, 2, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
-		
+	public File[] getFilesFromFolder(String RouterFilePath) {
 		File Folder = new File(RouterFilePath);
-		List<Route> Routes = new ArrayList<Route>();
-		
+		File[] Files = null;
 		if (Folder.exists() && Folder.isDirectory()) {
-			executor.scheduleAtFixedRate(() -> {
-				File[] Files = Folder.listFiles(file -> file.isFile());
-				for (File file : Files) {
-					if (FilesPath.DefaultRouterFileName.matcher(file.getName()).matches()) {
-						fileExecutor.submit(() -> {
-							Route route = new RouterFactory(file).getRoute();
-							if (route != null) {
-								Routes.add(route);
-								MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
-							} else {
-								MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
-							}
-						});
-					} else {
-						MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
-					}
-				}
-			}, 0, 5000, TimeUnit.MILLISECONDS);
+			Files = Folder.listFiles(file -> file.isFile());
 		}
-	}
-
-	public void DisableMonitorRoutes() {
-		if (executor != null) {
-			executor.shutdown();
-			executor = null;
-		}
-		if (fileExecutor != null) {
-			fileExecutor.shutdown();
-			fileExecutor = null;
-		}
+		return Files;
 	}
 
 	public void CreateFolder(String FolderPath) throws IOException {
@@ -191,7 +155,5 @@ public class ManagerFile {
 			BufferedReader.close();
 		if (BufferedWriter != null)
 			BufferedWriter.close();
-		if (executor != null)
-			executor.close();
 	}
 }

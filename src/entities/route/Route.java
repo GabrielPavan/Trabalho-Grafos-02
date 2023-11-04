@@ -3,8 +3,6 @@ package entities.route;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Node;
-
 public class Route {
 	private RouteHeader Header;
 	private List<RouteConnections> Connections = new ArrayList<>();

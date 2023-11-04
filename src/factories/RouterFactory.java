@@ -1,8 +1,6 @@
 package factories;
 
 import java.io.File;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 
 import entities.route.Route;
@@ -11,14 +9,11 @@ import entities.route.RouteHeader;
 import entities.route.RouteTrailer;
 import entities.route.RouteWeights;
 import infra.ManagerFile;
-import others.FilesPath;
 import others.RouteParameter;
 
 public class RouterFactory {
-	private List<String> Data = new ArrayList<String>();
-	private ManagerFile _ManageFile = new ManagerFile();
 
-	Route _Route = new Route();
+	Route _Route = null;
 
 	public Route getRoute() {
 		return _Route;
@@ -26,22 +21,24 @@ public class RouterFactory {
 
 	public RouterFactory(File pRouterFile) {
 		try {
-			ReadFileRoute(pRouterFile);
-			CreateRoute(Data);
-			
+			CreateRoute(ReadFileRoute(pRouterFile));
 		} catch (Exception e) {
 			_Route = null;
 			System.out.println("Falha na criação da Rota: " + pRouterFile.getName());
 			System.out.println(e.getMessage());
 		}
 	}
-	private void ReadFileRoute(File pRouterFile) throws Exception {
+	private List<String> ReadFileRoute(File pRouterFile) throws Exception {
+		ManagerFile _ManageFile = new ManagerFile();
 		_ManageFile.BufferFileReader(pRouterFile.getPath());
-		Data = _ManageFile.GetDataFromFile();
+		List<String> Data = _ManageFile.GetDataFromFile();
 		_ManageFile.closeFile();
+		return Data;
 	}
 
 	private void CreateRoute(List<String> pData) throws Exception {
+		
+		_Route = new Route();
 		
 		for (int i = 0; i < pData.size(); i++) {
 			String Row = pData.get(i);
@@ -88,16 +85,13 @@ public class RouterFactory {
 		if (NumberOfNodes == 0)
 			throw new Exception("Falha! -> Número total de nós inválido.");
 		
-		Integer teste = _Route.getTotalNodes();
-		
-		if (NumberOfNodes != teste) {
+		if (NumberOfNodes != _Route.getTotalNodes()) {
 			String NewHeader = "0";
 			NewHeader = NewHeader.concat(HeaderRow);
 			return CreateHeader(NewHeader);
 		}
 		
 		Integer SumOfEdgeWeights = Integer.parseInt(HeaderRow.substring(4));
-		
 		
 		if (SumOfEdgeWeights != _Route.getTotalSumOfWeights()) {
 			throw new Exception("Falha! -> Soma dos pesos difere (Valor do Registro HEADER = NN e Soma dos Pesos = NN)");
