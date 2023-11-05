@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
+import entities.grafo.Grafo;
+import entities.grafo.Node;
 import entities.route.Route;
 import infra.ManagerFile;
 import others.ConfigParameter;
@@ -173,6 +175,7 @@ public class MyTrayIcon {
 	
 	private void EnableMonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) {
 		List<Route> Routes = new ArrayList<Route>();
+		List<List<Node>> MinorPath = new ArrayList<List<Node>>();
 		
 		scheduledExecutor = Executors.newScheduledThreadPool(1);
 		routerCreatorPool = new ThreadPoolExecutor(0, 2, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
@@ -186,6 +189,7 @@ public class MyTrayIcon {
 						Route route = managerFile.CreateRouteFromFile(file);
 						if(route != null) {
 							Routes.add(route);
+							Grafo grafo = new Grafo(route);
 							managerFile.MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
 						} else {
 							managerFile.MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);

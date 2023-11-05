@@ -5,7 +5,7 @@ import java.util.List;
 public class Node {
 	private int nodeName;
 	private int cost;
-	private Node ancestor;
+	private Node ancestorNode;
 	private List<Node> NeighborNodes;
 	private List<Node> NoNeighborNodes;
 	
@@ -26,11 +26,11 @@ public class Node {
 	public void setCost(int cost) {
 		this.cost = cost;
 	}
-	public Node getAncestor() {
-		return ancestor;
+	public Node getAncestorNode() {
+		return ancestorNode;
 	}
-	public void setAncestor(Node ancestor) {
-		this.ancestor = ancestor;
+	public void setAncestorNode(Node ancestorNode) {
+		this.ancestorNode = ancestorNode;
 	}
 	public List<Node> getNeighborNodes() {
 		return NeighborNodes;
