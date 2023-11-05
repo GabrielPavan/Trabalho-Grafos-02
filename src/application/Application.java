@@ -11,7 +11,7 @@ public class Application {
 		MyTrayIcon myTrayIcon = new MyTrayIcon();
 		try {
 			myTrayIcon.createTrayIcon("./img/menu.png", "Meu TrayIcon");
-			myTrayIcon.setupConfig();
+			myTrayIcon.runSetupConfig();
 		} catch (Exception e) {
 			JOptionPane.showConfirmDialog(null, "Erro no TrayIcon: \n\n" + e.getMessage());
 		}

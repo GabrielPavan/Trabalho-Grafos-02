@@ -83,7 +83,7 @@ public class MyTrayIcon {
 		}
 	}
 	
-	public void setupConfig() {
+	public void runSetupConfig() {
 		if(!managerFile.ExecutionFileExist()) {
 			openAndConfigForm(new ConfigForm(null, null, null, false, false));
 		} else {

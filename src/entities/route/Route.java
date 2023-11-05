@@ -2,11 +2,14 @@ package entities.route;
 
 import java.util.ArrayList;
 import java.util.List;
+import entities.grafo.Node;
 
 public class Route {
 	private RouteHeader Header;
 	private List<RouteConnections> Connections = new ArrayList<>();
 	private List<RouteWeights> Weights = new ArrayList<>();
+	private List<Node> Nodes = new ArrayList<Node>();
+
 	private RouteTrailer Trailer;
 	
 	private int sumOfWeights;
@@ -29,25 +32,33 @@ public class Route {
 	public void setWeights(List<RouteWeights> weights) {
 		Weights = weights;
 	}
+	public List<Node> getNodes() {
+		return Nodes;
+	}
+	public void setNodes(List<Node> nodes) {
+		Nodes = nodes;
+	}
 	public RouteTrailer getTrailer() {
 		return Trailer;
 	}
 	public void setTrailer(RouteTrailer trailer) {
 		Trailer = trailer;
 	}
-	
+
+
 	public Integer getTotalNodes() {
 		if(Connections.size() == 0)
 			return 0;
 		
-		List<Integer> Nodes = new ArrayList<Integer>();
-		
 		Connections.forEach(x -> {
-			if(!Nodes.contains(x.OriginNode)) {
-				Nodes.add(x.OriginNode);
+			Node OriginNode = new Node(x.OriginNode, 0);
+			Node DestinyNode = new Node(x.DestinyNode, 0);
+			
+			if(!Nodes.contains(OriginNode)) {
+				Nodes.add(OriginNode);
 			}
-			if(!Nodes.contains(x.DestinyNode)) {
-				Nodes.add(x.DestinyNode);
+			if(!Nodes.contains(DestinyNode)) {
+				Nodes.add(DestinyNode);
 			}
 		});
 		
@@ -64,4 +75,5 @@ public class Route {
 		
 		return sumOfWeights;
 	}
+
 }

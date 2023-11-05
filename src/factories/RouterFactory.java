@@ -85,7 +85,9 @@ public class RouterFactory {
 		if (NumberOfNodes == 0)
 			throw new Exception("Falha! -> Número total de nós inválido.");
 		
-		if (NumberOfNodes != _Route.getTotalNodes()) {
+		Integer teste = _Route.getTotalNodes();
+		
+		if (NumberOfNodes != teste) {
 			String NewHeader = "0";
 			NewHeader = NewHeader.concat(HeaderRow);
 			return CreateHeader(NewHeader);
