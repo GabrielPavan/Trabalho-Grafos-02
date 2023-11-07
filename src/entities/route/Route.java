@@ -8,11 +8,9 @@ public class Route {
 	private RouteHeader Header;
 	private List<RouteConnections> Connections = new ArrayList<>();
 	private List<RouteWeights> Weights = new ArrayList<>();
-	private List<Node> Nodes = new ArrayList<Node>();
-
 	private RouteTrailer Trailer;
 	
-	private int sumOfWeights;
+	private List<Node> Nodes = new ArrayList<Node>();
 	
 	public RouteHeader getHeader() {
 		return Header;
@@ -45,8 +43,7 @@ public class Route {
 		Trailer = trailer;
 	}
 
-
-	public Integer getTotalNodes() {
+	public int getTotalNodes() {
 		if(Connections.size() == 0)
 			return 0;
 		
@@ -69,11 +66,11 @@ public class Route {
 		if(Weights.size() == 0)
 			return 0;
 		
-		Weights.forEach(x -> {
-			sumOfWeights += x.getWeight();
-		});
+		int sumOfWeights = 0;
+		for (RouteWeights Weight : Weights) {
+			sumOfWeights += Weight.getWeight();
+		}
 		
 		return sumOfWeights;
 	}
-
 }

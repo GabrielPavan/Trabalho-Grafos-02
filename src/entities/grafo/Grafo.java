@@ -23,14 +23,14 @@ public class Grafo {
 	public List<Node> caminhoMinimo(Node noOrigin, Node noDestiny) {
 
 		nodesNotVisited = new HashSet<Node>();
-
-		nodes.forEach(node -> {
+		
+		for (Node node : nodes) {
 			if (!node.equals(noOrigin)) {
 				node.setCost(Integer.MAX_VALUE);
 			}
 			node.setAncestorNode(null);
 			nodesNotVisited.add(node);
-		});
+		}
 
 		while (!nodesNotVisited.isEmpty()) {
 			Node ClosestNode = getClosestNode(nodesNotVisited);
@@ -60,22 +60,23 @@ public class Grafo {
 		}
 		return ClosestNode;
 	}
-
+	
 	private List<Node> getNeighbors(Node pNode) {
 		List<Node> NeighborsNodes = route.getConnections().stream()
-				.filter(conn -> pNode.getNodeName() == conn.getOriginNode())
-				.map(conn -> new Node(conn.getDestinyNode(), Integer.MAX_VALUE)).collect(Collectors.toList());
+															.filter(conn -> pNode.getNodeName() == conn.getOriginNode())
+															.map(conn -> new Node(conn.getDestinyNode(), Integer.MAX_VALUE))
+															.collect(Collectors.toList());
 
-		NeighborsNodes.forEach(node -> {
+		for (Node node : NeighborsNodes) {
 			route.getWeights().stream()
-					.filter(weight -> (pNode.getNodeName() == weight.getOriginNode()))
-					.forEach(weight -> {
-						if(node.getNodeName() == weight.getDestinyNode()) {
-							node.setCost(pNode.getCost() + weight.getWeight());
-							node.setAncestorNode(pNode);
-						}
-					});
-		});
+								.filter(weight -> (pNode.getNodeName() == weight.getOriginNode()))
+								.forEach(weight -> {
+									if(node.getNodeName() == weight.getDestinyNode()) {
+										node.setCost(pNode.getCost() + weight.getWeight());
+										node.setAncestorNode(pNode);
+									}
+								});
+		}
 
 		return NeighborsNodes;
 	}
@@ -83,7 +84,7 @@ public class Grafo {
 	private void UpdateNodeList(Node closestNode) {
 		for(Node Node : closestNode.getNeighborNodes()) {
 			for(Node node2 : nodes) {
-				if (Node.getNodeName() == node2.getNodeName()) {
+				if (Node.equals(node2)) {
 					 if(Node.getCost() <= node2.getCost()) {
 						 node2.setCost(Node.getCost());
 						 node2.setAncestorNode(closestNode);
@@ -95,8 +96,9 @@ public class Grafo {
 	
 	private List<Node> criandoMenorCaminho(Node noOrigin, Node noDestiny){
 		List<Node> MenorCaminho = new ArrayList<Node>();
+		
 		for (Node node : nodes) {
-			if(node.getNodeName() == noDestiny.getNodeName()) {
+			if(node.equals(noDestiny)) {
 				Node antecessor = node;
 				while(antecessor.getAncestorNode() != null) {
 					MenorCaminho.add(antecessor);

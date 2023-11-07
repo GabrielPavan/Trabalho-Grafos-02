@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
@@ -22,17 +21,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 
-import entities.grafo.Grafo;
-import entities.grafo.Node;
 import entities.route.Route;
 import infra.ManagerFile;
 import others.ConfigParameter;
 
 public class MyTrayIcon {
 	
-	private TrayIcon trayIcon;
-	private ManagerFile managerFile = new ManagerFile();
-	
+	private ManagerFile managerFile;
 	private ScheduledExecutorService scheduledExecutor;
 	private ThreadPoolExecutor routerCreatorPool;
 	
@@ -72,7 +67,7 @@ public class MyTrayIcon {
 			popup.add(viewItem);
 			popup.add(exitItem);
 			
-			trayIcon = new TrayIcon(image, toolTip, popup);
+			TrayIcon trayIcon = new TrayIcon(image, toolTip, popup);
 			trayIcon.setImageAutoSize(true);
 			
 			try {
@@ -86,6 +81,7 @@ public class MyTrayIcon {
 	}
 	
 	public void runSetupConfig() {
+		managerFile = new ManagerFile();
 		if(!managerFile.ExecutionFileExist()) {
 			openAndConfigForm(new ConfigForm(null, null, null, false, false));
 		} else {
@@ -174,22 +170,18 @@ public class MyTrayIcon {
 	}
 	
 	private void EnableMonitorRoutes(String RouterFilePath, String RouterSucessFilePath, String RouterFailFilePath) {
-		List<Route> Routes = new ArrayList<Route>();
-		List<List<Node>> MinorPath = new ArrayList<List<Node>>();
 		
 		scheduledExecutor = Executors.newScheduledThreadPool(1);
 		routerCreatorPool = new ThreadPoolExecutor(0, 2, 1000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(15));
 		
 		scheduledExecutor.scheduleAtFixedRate(() -> {
-			File[] Files = null;
-			Files = managerFile.getFilesFromFolder(RouterFilePath);
+			File[] Files = managerFile.getFilesFromFolder(RouterFilePath);
 			if(Files != null) {
 				for (File file : Files) {
 					routerCreatorPool.execute(() -> {
 						Route route = managerFile.CreateRouteFromFile(file);
 						if(route != null) {
-							Routes.add(route);
-							Grafo grafo = new Grafo(route);
+							
 							managerFile.MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
 						} else {
 							managerFile.MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
@@ -200,7 +192,8 @@ public class MyTrayIcon {
 		}
 		, 0, 5000, TimeUnit.MILLISECONDS);
 	}
-	public void DisableMonitorRoutes() {
+	
+	private void DisableMonitorRoutes() {
 		if (scheduledExecutor != null) {
 			scheduledExecutor.shutdown();
 			scheduledExecutor = null;
