@@ -1,16 +1,16 @@
 package entities.route;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import entities.grafo.Node;
+import java.util.Set;
 
 public class Route {
+	
 	private RouteHeader Header;
 	private List<RouteConnections> Connections = new ArrayList<>();
 	private List<RouteWeights> Weights = new ArrayList<>();
 	private RouteTrailer Trailer;
-	
-	private List<Node> Nodes = new ArrayList<Node>();
 	
 	public RouteHeader getHeader() {
 		return Header;
@@ -30,12 +30,6 @@ public class Route {
 	public void setWeights(List<RouteWeights> weights) {
 		Weights = weights;
 	}
-	public List<Node> getNodes() {
-		return Nodes;
-	}
-	public void setNodes(List<Node> nodes) {
-		Nodes = nodes;
-	}
 	public RouteTrailer getTrailer() {
 		return Trailer;
 	}
@@ -47,19 +41,13 @@ public class Route {
 		if(Connections.size() == 0)
 			return 0;
 		
-		Connections.forEach(x -> {
-			Node OriginNode = new Node(x.OriginNode, 0);
-			Node DestinyNode = new Node(x.DestinyNode, 0);
-			
-			if(!Nodes.contains(OriginNode)) {
-				Nodes.add(OriginNode);
-			}
-			if(!Nodes.contains(DestinyNode)) {
-				Nodes.add(DestinyNode);
-			}
-		});
+		Set<Integer> connIDs = new HashSet<Integer>();
 		
-		return Nodes.size();
+		for (RouteConnections conn : Connections) {
+			connIDs.add(conn.DestinyNode);
+			connIDs.add(conn.OriginNode);
+		}
+		return connIDs.size();
 	}
 	
 	public int getTotalSumOfWeights() {

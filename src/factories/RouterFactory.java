@@ -85,9 +85,7 @@ public class RouterFactory {
 		if (NumberOfNodes == 0)
 			throw new Exception("Falha! -> Número total de nós inválido.");
 		
-		Integer teste = _Route.getTotalNodes();
-		
-		if (NumberOfNodes != teste) {
+		if (NumberOfNodes != _Route.getTotalNodes()) {
 			String NewHeader = "0";
 			NewHeader = NewHeader.concat(HeaderRow);
 			return CreateHeader(NewHeader);
@@ -113,7 +111,7 @@ public class RouterFactory {
 		return new RouteConnections(OriginNode, DestinyNode);
 	}
 
-	private RouteWeights CreateRouteWeights(String WeightRow) {
+	private RouteWeights CreateRouteWeights(String WeightRow) throws Exception {
 		// 02NO;ND=P
 		// [0] [1]
 		String[] Data = WeightRow.split(RouteParameter.DefaultDataSlipter);
@@ -121,6 +119,10 @@ public class RouterFactory {
 		Integer OriginNode = Integer.parseInt(Data[0].substring(2));
 		Integer DestinyNode = Integer.parseInt(Data[1].split(RouteParameter.DefaultValueSpliter)[0]);
 		Integer Weight = Integer.parseInt(Data[1].split(RouteParameter.DefaultValueSpliter)[1]);
+		
+		if(Weight < 0) {
+			throw new Exception("O peso da rota não pode ser negativo");
+		}
 
 		return new RouteWeights(OriginNode, DestinyNode, Weight);
 	}

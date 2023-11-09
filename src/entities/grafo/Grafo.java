@@ -7,18 +7,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import entities.route.Route;
-
 public class Grafo {
 
-	private Route route;
-	private List<Node> nodes;
-	private Set<Node> nodesNotVisited;
-
-	public Grafo(Route pRoute) {
-		route = pRoute;
-		nodes = pRoute.getNodes();
+	private Set<Node> nodes;
+	private List<Arrest> arrests;
+	
+	public Set<Node> getNodes() {
+		return nodes;
 	}
+	public void setNodes(Set<Node> nodes) {
+		this.nodes = nodes;
+	}
+	public List<Arrest> getArrests() {
+		return arrests;
+	}
+	public void setArrests(List<Arrest> arrests) {
+		this.arrests = arrests;
+	}
+
+	private Set<Node> nodesNotVisited;
 
 	public List<Node> caminhoMinimo(Node noOrigin, Node noDestiny) {
 
@@ -27,6 +34,8 @@ public class Grafo {
 		for (Node node : nodes) {
 			if (!node.equals(noOrigin)) {
 				node.setCost(Integer.MAX_VALUE);
+			} else {
+				node.setCost(0);
 			}
 			node.setAncestorNode(null);
 			nodesNotVisited.add(node);
@@ -39,13 +48,12 @@ public class Grafo {
 			
 			if (ClosestNode == null) {
 				break;
+			} else if(ClosestNode.equals(noDestiny)) {
+				return criandoMenorCaminho(noOrigin, noDestiny);
 			}
-
 			ClosestNode.setNeighborNodes(getNeighbors(ClosestNode));
-			
 			UpdateNodeList(ClosestNode);
 		}
-		
 		return criandoMenorCaminho(noOrigin, noDestiny);
 	}
 
@@ -62,22 +70,21 @@ public class Grafo {
 	}
 	
 	private List<Node> getNeighbors(Node pNode) {
-		List<Node> NeighborsNodes = route.getConnections().stream()
-															.filter(conn -> pNode.getNodeName() == conn.getOriginNode())
-															.map(conn -> new Node(conn.getDestinyNode(), Integer.MAX_VALUE))
-															.collect(Collectors.toList());
+		List<Node> NeighborsNodes = arrests.stream()
+											.filter(arrest -> pNode.getNodeName() == arrest.getOriginNode())
+											.map(arrest -> new Node(arrest.getDestinyNode(), Integer.MAX_VALUE))
+											.collect(Collectors.toList());
 
 		for (Node node : NeighborsNodes) {
-			route.getWeights().stream()
-								.filter(weight -> (pNode.getNodeName() == weight.getOriginNode()))
-								.forEach(weight -> {
-									if(node.getNodeName() == weight.getDestinyNode()) {
-										node.setCost(pNode.getCost() + weight.getWeight());
-										node.setAncestorNode(pNode);
-									}
-								});
+			arrests.stream()
+						.filter(weight -> (pNode.getNodeName() == weight.getOriginNode()))
+						.forEach(weight -> {
+							if(node.getNodeName() == weight.getDestinyNode()) {
+								node.setCost(pNode.getCost() + weight.getWeight());
+								node.setAncestorNode(pNode);
+							}
+						});
 		}
-
 		return NeighborsNodes;
 	}
 	
@@ -110,7 +117,6 @@ public class Grafo {
 			}
 		}
 		Collections.reverse(MenorCaminho);
-		
 		return MenorCaminho;
 	}
 }

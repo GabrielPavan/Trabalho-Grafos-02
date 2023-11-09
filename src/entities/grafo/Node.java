@@ -1,10 +1,12 @@
 package entities.grafo;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Node {
 	private int nodeName;
 	private int cost;
+	
 	private Node ancestorNode;
 	private List<Node> NeighborNodes;
 	private List<Node> NoNeighborNodes;
@@ -46,15 +48,19 @@ public class Node {
 	}
 
 	@Override
-    public boolean equals(Object param) {
-		if(param instanceof Node) {
-			Node node = (Node) param;
-			if(this.nodeName == node.nodeName) {
-				return true;
-			}
-		}
-        return false;
-    }
+	public boolean equals(Object param) {
+	    if (this == param) {
+	        return true;
+	    }
+	    if (param == null || getClass() != param.getClass()) {
+	        return false;
+	    }
+	    Node node = (Node) param;
+	    return Objects.equals(nodeName, node.nodeName);
+	}
 
-	
+	@Override
+	public int hashCode() {
+	    return Objects.hash(nodeName);
+	}
 }
