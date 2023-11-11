@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+
+import entities.grafo.Node;
 import entities.route.Route;
 import factories.RouterFactory;
 import others.ConfigParameter;
@@ -36,8 +38,8 @@ public class ManagerFile {
 		BufferedReader = new BufferedReader(InputStreamReader);
 	}
 
-	public void BufferFileWriter(String FilePath) throws IOException {
-		OutputStream = new FileOutputStream(FilePath);
+	public void BufferFileWriter(String FilePath, boolean append) throws IOException {
+		OutputStream = new FileOutputStream(FilePath, append);
 		OutputStreamWriter = new OutputStreamWriter(OutputStream);
 		BufferedWriter = new BufferedWriter(OutputStreamWriter);
 	}
@@ -63,7 +65,7 @@ public class ManagerFile {
 			executionFile.delete();
 		}
 		executionFile.createNewFile();
-		BufferFileWriter(executionFile.getAbsolutePath());
+		BufferFileWriter(executionFile.getAbsolutePath(), false);
 		BufferedWriter.append("MainFolder=" + MainFolder + "\n");
 		BufferedWriter.append("SucessFolder=" + SucessFolder + "\n");
 		BufferedWriter.append("FailFolder=" + FailFolder + "\n");
@@ -148,6 +150,14 @@ public class ManagerFile {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void addShortestPathToFile(File file, List<Node> nodes) throws IOException {
+		BufferFileWriter(file.getAbsolutePath(), true);
+		for (Node node : nodes) {
+			BufferedWriter.append(node.toString());
+		}
+		closeFile();
 	}
 
 	public void closeFile() throws IOException {

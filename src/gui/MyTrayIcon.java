@@ -184,8 +184,11 @@ public class MyTrayIcon {
 						Route route = managerFile.CreateRouteFromFile(file);
 						if(route != null) {
 							Grafo grafo = new GrafoFactory(route).getGrafo();
-							System.out.println(grafo.caminhoMinimo(grafo.getSmallestNode(), grafo.getBiggestNode()));
-							
+							try {
+								managerFile.addShortestPathToFile(file, grafo.caminhoMinimo(grafo.getSmallestNode(), grafo.getBiggestNode()));
+							} catch (IOException e) {
+								managerFile.MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
+							}
 							managerFile.MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
 						} else {
 							managerFile.MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);
