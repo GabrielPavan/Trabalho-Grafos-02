@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 
 import entities.grafo.Grafo;
-import entities.grafo.Node;
 import entities.route.Route;
 import factories.GrafoFactory;
 import infra.ManagerFile;
@@ -185,8 +184,8 @@ public class MyTrayIcon {
 						Route route = managerFile.CreateRouteFromFile(file);
 						if(route != null) {
 							Grafo grafo = new GrafoFactory(route).getGrafo();
-							System.out.println(grafo.caminhoMinimo(new Node(0, Integer.MAX_VALUE), new Node(7, Integer.MAX_VALUE)));
-
+							System.out.println(grafo.caminhoMinimo(grafo.getSmallestNode(), grafo.getBiggestNode()));
+							
 							managerFile.MoveFile(file, RouterSucessFilePath, StandardCopyOption.REPLACE_EXISTING);
 						} else {
 							managerFile.MoveFile(file, RouterFailFilePath, StandardCopyOption.REPLACE_EXISTING);

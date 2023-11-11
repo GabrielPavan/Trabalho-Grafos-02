@@ -24,6 +24,28 @@ public class Grafo {
 	public void setArrests(List<Arrest> arrests) {
 		this.arrests = arrests;
 	}
+	public Node getBiggestNode() {
+		Integer nodeName = 0;
+		Node BiggestNode = null;
+		for (Node node : nodes) {
+			if(node.getNodeName() > nodeName) {
+				nodeName = node.getNodeName();
+				BiggestNode = node;
+			}
+		}
+		return BiggestNode;
+	}
+	public Node getSmallestNode() {
+		Integer nodeName = Integer.MAX_VALUE;
+		Node SmallestNode = null;
+		for (Node node : nodes) {
+			if(node.getNodeName() < nodeName) {
+				nodeName = node.getNodeName();
+				SmallestNode = node;
+			}	
+		}
+		return SmallestNode;
+	}
 
 	private Set<Node> nodesNotVisited;
 

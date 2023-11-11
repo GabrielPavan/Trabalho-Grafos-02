@@ -63,4 +63,9 @@ public class Node {
 	public int hashCode() {
 	    return Objects.hash(nodeName);
 	}
+	
+	@Override
+	public String toString() {
+		return "No: " + nodeName + " Custo: " + cost;
+	}
 }
