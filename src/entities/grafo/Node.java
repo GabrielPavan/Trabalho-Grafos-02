@@ -66,6 +66,6 @@ public class Node {
 	
 	@Override
 	public String toString() {
-		return "No: " + nodeName + " Custo: " + cost + " ";
+		return "No: " + nodeName + " Custo: " + cost + "  ";
 	}
 }

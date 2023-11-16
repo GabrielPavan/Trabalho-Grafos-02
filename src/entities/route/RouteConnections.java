@@ -4,6 +4,10 @@ public class RouteConnections {
 	int OriginNode;
 	int DestinyNode;
 	
+	public RouteConnections() {
+		
+	}
+	
 	public RouteConnections(int originNode, int destinyNode) {
 		OriginNode = originNode;
 		DestinyNode = destinyNode;

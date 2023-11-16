@@ -5,6 +5,9 @@ public class RouteWeights {
 	private int DestinyNode;
 	private int Weight;
 	
+	public RouteWeights() {
+		
+	}
 	public RouteWeights(int originNode, int destinyNode, int weight) {
 		OriginNode = originNode;
 		DestinyNode = destinyNode;
