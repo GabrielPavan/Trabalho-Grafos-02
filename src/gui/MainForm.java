@@ -238,7 +238,7 @@ public class MainForm extends JFrame {
 				}
 				
 				Grafo grafo = new GrafoFactory(route).getGrafo();
-				System.out.println(grafo.caminhoMinimo(grafo.getSmallestNode(), grafo.getBiggestNode()));
+				JOptionPane.showMessageDialog(null, "Menor caminho para o grafo: \n\n" + grafo.caminhoMinimo(grafo.getSmallestNode(), grafo.getBiggestNode()));
 			}
 		});
 		btnProcess.setFont(new Font("Tahoma", Font.PLAIN, 14));
